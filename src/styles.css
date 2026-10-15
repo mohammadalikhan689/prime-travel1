@@ -188,3 +188,4 @@
 .hero-word { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .06em .1em 0; margin-bottom: -.1em; }
 .hero-word > span { display: inline-block; animation: word-up 1s cubic-bezier(.2,.7,.2,1) both; }
 @keyframes seal-spin { to { transform: rotate(360deg); } }
+@keyframes dash-flow { to { stroke-dashoffset: -140; } }
