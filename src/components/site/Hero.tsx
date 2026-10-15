@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ArrowRight, Check } from "lucide-react";
-import heroImg from "@/assets/hero.webp";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { WhatsAppIcon } from "@/components/site/Layout";
 import { WHATSAPP_URL, destinations } from "@/lib/site";
 
@@ -9,7 +8,7 @@ const AUTOPLAY_MS = 7000;
 
 const short: Record<string, string> = { schengen: "Schengen", usa: "USA", canada: "Canada", turkey: "Turkey", morocco: "Morocco" };
 
-// Last item in each list shows as "in progress" (pulsing ring), the rest as done.
+// Last item in each list shows as "in progress" (pulsing ring); the rest as done.
 const checklists: Record<string, string[]> = {
   schengen: ["Passport & photos", "Application form", "Cover letter", "Appointment guidance"],
   usa: ["Passport & photo", "Form guidance", "Financial documents", "Interview preparation"],
@@ -22,34 +21,28 @@ const headline = ["Your", "Visa", "Journey,", "*Fast-Tracked*", "With", "Expert"
 
 export function Hero() {
   const section = useRef<HTMLElement>(null);
-  const scrollLayer = useRef<HTMLDivElement>(null);
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [reduced, setReduced] = useState(true); // assume reduced until checked: no autoplay on server render
+  const [reduced, setReduced] = useState(true); // assume reduced until checked, so no autoplay during server render
+  const n = destinations.length;
   const d = destinations[idx]!;
   const items = checklists[d.slug] ?? checklists.schengen!;
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    if (mq.matches) return;
-    let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        if (scrollLayer.current) scrollLayer.current.style.transform = `translate3d(0, ${window.scrollY * 0.25}px, 0)`;
-      });
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
+    setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
-  // Cursor parallax: writes CSS variables directly, so no React re-renders on mouse move.
-  const onMove = (e: React.MouseEvent<HTMLElement>) => {
-    if (reduced || !section.current) return;
-    const r = section.current.getBoundingClientRect();
-    section.current.style.setProperty("--px", String(((e.clientX - r.left) / r.width - 0.5) * 2));
-    section.current.style.setProperty("--py", String(((e.clientY - r.top) / r.height - 0.5) * 2));
+  // Cursor effects write CSS variables directly: no React re-render on mouse move.
+  const onMove = (e: MouseEvent<HTMLElement>) => {
+    const el = section.current;
+    if (reduced || !el) return;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    el.style.setProperty("--px", String((x - 0.5) * 2));
+    el.style.setProperty("--py", String((y - 0.5) * 2));
+    el.style.setProperty("--mx", `${x * 100}%`);
+    el.style.setProperty("--my", `${y * 100}%`);
   };
 
   return (
@@ -57,116 +50,150 @@ export function Hero() {
       ref={section}
       onMouseMove={onMove}
       style={{ "--px": 0, "--py": 0 } as CSSProperties}
-      className="relative flex min-h-[100svh] items-end overflow-hidden bg-navy text-ivory"
+      className="relative flex min-h-[100svh] items-center overflow-hidden bg-navy-deep text-ivory"
     >
-      {/* Background: one layer per destination, crossfading */}
-      <div ref={scrollLayer} className="absolute inset-0 will-change-transform">
-        <div className="absolute inset-0 transition-transform duration-300 ease-out" style={{ transform: "translate3d(calc(var(--px) * -14px), calc(var(--py) * -10px), 0)" }}>
-          {destinations.map((x, i) => (
-            <div key={x.slug} className="absolute inset-0 transition-opacity duration-[1400ms] ease-in-out" style={{ opacity: i === idx ? 1 : 0 }} aria-hidden={i !== idx}>
-              <img
-                src={i === 0 ? heroImg : x.image}
-                alt={i === 0 ? "Paris rooftops at dusk with the Eiffel Tower" : `${x.name} travel scene`}
-                width={i === 0 ? 1800 : 800}
-                height={i === 0 ? 1020 : 1000}
-                fetchPriority={i === 0 ? "high" : "auto"}
-                className={`animate-kenburns h-full w-full object-cover ${i === 0 ? "" : "blur-[2px]"}`}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy/60 to-navy/30" />
+      {/* Atmosphere: grid, cursor glow, grain */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: "linear-gradient(color-mix(in oklab, var(--ivory) 7%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--ivory) 7%, transparent) 1px, transparent 1px)",
+          backgroundSize: "84px 84px",
+          maskImage: "radial-gradient(ellipse at 70% 45%, black 10%, transparent 72%)",
+          WebkitMaskImage: "radial-gradient(ellipse at 70% 45%, black 10%, transparent 72%)",
+        }}
+      />
+      <div className="absolute inset-0" style={{ background: "radial-gradient(760px circle at var(--mx, 72%) var(--my, 38%), color-mix(in oklab, var(--gold) 22%, transparent), transparent 62%)" }} />
+      <div className="absolute inset-0" style={{ background: "radial-gradient(900px circle at 0% 100%, color-mix(in oklab, var(--navy) 90%, transparent), transparent 70%)" }} />
       <div className="grain absolute inset-0" />
 
-      {/* Destination card (desktop) */}
-      <div
-        className="animate-rise absolute bottom-48 right-10 hidden w-[19rem] lg:block"
-        style={{ animationDelay: "1.1s" }}
-      >
-        <div style={{ transform: "translate3d(calc(var(--px) * 10px), calc(var(--py) * 8px), 0)", transition: "transform .3s ease-out" }}>
-          <div className="relative aspect-[4/5] overflow-hidden border border-ivory/20" style={{ animation: "float-y 7s ease-in-out infinite" }}>
-            {destinations.map((x, i) => (
-              <img key={x.slug} src={x.image} alt="" aria-hidden="true" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms]" style={{ opacity: i === idx ? 1 : 0 }} />
-            ))}
-            <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/90 via-navy-deep/10 to-transparent" />
-            <div key={d.slug} className="glass absolute inset-x-3 bottom-3 p-5">
-              <p className="eyebrow">Sample file · {short[d.slug]}</p>
-              <ul className="mt-4 space-y-2.5">
-                {items.map((t, i) => {
-                  const done = i < items.length - 1;
-                  return (
-                    <li key={t} className="animate-rise flex items-center gap-3 text-[0.82rem] text-ivory/90" style={{ animationDelay: `${300 + i * 320}ms` }}>
-                      <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full ${done ? "bg-gold text-navy-deep" : "border border-gold"}`} style={done ? { animation: `tick-pop .5s ${500 + i * 320}ms both` } : undefined}>
-                        {done ? <Check className="h-3 w-3" /> : <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold" />}
-                      </span>
-                      {t}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </div>
-        </div>
+      {/* Giant outlined destination name */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-[-2vw] select-none overflow-hidden whitespace-nowrap text-center font-serif text-[19vw] leading-none">
+        <span key={d.slug} className="outline-text animate-rise inline-block opacity-70">{short[d.slug]!.toUpperCase()}</span>
       </div>
 
-      {/* Copy */}
-      <div className="container-x relative pb-8 pt-40 md:pb-10">
-        <p className="eyebrow animate-rise" style={{ animationDelay: "300ms" }}>Visa & Travel Consultancy</p>
-        <h1 className="mt-6 max-w-5xl text-5xl leading-[1.02] sm:text-6xl md:text-8xl">
-          {headline.map((w, i) => {
-            const em = w.startsWith("*");
-            const text = em ? w.slice(1, -1) : w;
-            return (
-              <span key={w}>
-                <span className="hero-word">
-                  <span style={{ animationDelay: `${450 + i * 90}ms` }}>{em ? <em className="text-gold-soft">{text}</em> : text}</span>
-                </span>{" "}
-              </span>
-            );
-          })}
-        </h1>
+      <div className="container-x relative z-10 grid items-center gap-20 pb-16 pt-32 lg:grid-cols-12 lg:gap-10 lg:pb-20">
+        {/* Copy */}
+        <div className="lg:col-span-7">
+          <p className="eyebrow animate-rise" style={{ animationDelay: "200ms" }}>Visa & Travel Consultancy</p>
+          <h1 className="mt-6 text-5xl leading-[1.02] sm:text-6xl xl:text-7xl">
+            {headline.map((w, i) => {
+              const em = w.startsWith("*");
+              const text = em ? w.slice(1, -1) : w;
+              return (
+                <span key={w}>
+                  <span className="hero-word">
+                    <span style={{ animationDelay: `${350 + i * 90}ms` }}>{em ? <em className="text-gold-soft">{text}</em> : text}</span>
+                  </span>{" "}
+                </span>
+              );
+            })}
+          </h1>
 
-        <p key={d.slug} className="animate-rise mt-8 min-h-[4.5rem] max-w-xl text-lg text-ivory/80 md:min-h-[3.5rem]">
-          <span className="mr-2 font-semibold text-gold-soft">{d.name}.</span>
-          {d.blurb}
-        </p>
+          <p key={d.slug} className="animate-rise mt-8 min-h-[5.5rem] max-w-xl text-lg text-ivory/80 md:min-h-[4.5rem]">
+            <span className="mr-2 font-semibold text-gold-soft">{d.name}.</span>
+            {d.blurb}
+          </p>
 
-        <div className="animate-rise mt-8 flex flex-col gap-4 sm:flex-row sm:items-center" style={{ animationDelay: "1s" }}>
-          <Link to="/contact" className="btn btn-gold">Get a Free Assessment <ArrowRight className="h-4 w-4" /></Link>
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="btn btn-ghost-light"><WhatsAppIcon className="h-4 w-4" /> Chat on WhatsApp</a>
+          <div className="animate-rise mt-8 flex flex-col gap-4 sm:flex-row sm:items-center" style={{ animationDelay: "900ms" }}>
+            <Link to="/contact" className="btn btn-gold">Get a Free Assessment <ArrowRight className="h-4 w-4" /></Link>
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="btn btn-ghost-light"><WhatsAppIcon className="h-4 w-4" /> Chat on WhatsApp</a>
+          </div>
+
+          {/* Destination selector with autoplay progress */}
+          <div
+            role="tablist"
+            aria-label="Choose a destination"
+            className="animate-rise mt-12 grid max-w-xl grid-cols-5 gap-3 sm:gap-4"
+            style={{ animationDelay: "1.1s" }}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+            onFocus={() => setPaused(true)}
+            onBlur={() => setPaused(false)}
+          >
+            {destinations.map((x, i) => {
+              const active = i === idx;
+              return (
+                <button key={x.slug} type="button" role="tab" aria-selected={active} onClick={() => setIdx(i)} className="group text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold">
+                  <span className="relative block h-[2px] overflow-hidden bg-ivory/20">
+                    <span
+                      className="absolute inset-0 origin-left bg-gold"
+                      style={{
+                        transform: i < idx || (active && reduced) ? "scaleX(1)" : "scaleX(0)",
+                        ...(active && !reduced ? { animation: `hero-progress ${AUTOPLAY_MS}ms linear forwards`, animationPlayState: paused ? "paused" : "running" } : {}),
+                      }}
+                      onAnimationEnd={active && !reduced ? () => setIdx((c) => (c + 1) % n) : undefined}
+                    />
+                  </span>
+                  <span className={`eyebrow mt-3 block !text-[0.6rem] ${active ? "" : "!text-ivory/45 group-hover:!text-ivory/80"}`}>0{i + 1}</span>
+                  <span className={`mt-1 block font-serif text-base transition-colors sm:text-xl ${active ? "text-ivory" : "text-ivory/55 group-hover:text-ivory/90"}`}>{short[x.slug]}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Destination selector with autoplay progress */}
-        <div
-          role="tablist"
-          aria-label="Choose a destination"
-          className="animate-rise mt-12 grid grid-cols-5 gap-2 sm:gap-4"
-          style={{ animationDelay: "1.2s" }}
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-          onFocus={() => setPaused(true)}
-          onBlur={() => setPaused(false)}
-        >
-          {destinations.map((x, i) => {
-            const active = i === idx;
-            return (
-              <button key={x.slug} type="button" role="tab" aria-selected={active} onClick={() => setIdx(i)} className="group text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold">
-                <span className="relative block h-[2px] overflow-hidden bg-ivory/20">
-                  <span
-                    className="absolute inset-0 origin-left bg-gold"
+        {/* Card stack */}
+        <div className="animate-rise relative mx-auto pb-6 lg:col-span-5" style={{ animationDelay: "700ms" }}>
+          <div className="relative h-[25rem] w-[18.5rem] [--s:20px] sm:h-[32rem] sm:w-[24rem] sm:[--s:34px]" style={{ perspective: "1200px" }}>
+            <div className="absolute inset-0" style={{ transformStyle: "preserve-3d", transform: "rotateY(calc(var(--px) * 7deg)) rotateX(calc(var(--py) * -5deg))", transition: "transform .4s ease-out" }}>
+              {destinations.map((x, i) => {
+                const o = (i - idx + n) % n;
+                const visible = o < 3;
+                return (
+                  <button
+                    key={x.slug}
+                    type="button"
+                    onClick={() => setIdx(i)}
+                    aria-label={`Show ${x.name}`}
+                    tabIndex={o === 0 || !visible ? -1 : 0}
+                    className="absolute inset-0 overflow-hidden border border-ivory/20 bg-navy text-left shadow-[0_40px_80px_-30px_rgba(0,0,0,.85)]"
                     style={{
-                      transform: i < idx || (active && reduced) ? "scaleX(1)" : "scaleX(0)",
-                      ...(active && !reduced ? { animation: `hero-progress ${AUTOPLAY_MS}ms linear forwards`, animationPlayState: paused ? "paused" : "running" } : {}),
+                      zIndex: n - o,
+                      opacity: visible ? 1 - o * 0.15 : 0,
+                      pointerEvents: visible ? "auto" : "none",
+                      filter: o === 0 ? "none" : `brightness(${1 - o * 0.2})`,
+                      transform: `translate3d(calc(var(--s) * ${o}), calc(var(--s) * ${o} * -0.65), 0) rotate(${o * 4.5}deg) scale(${1 - o * 0.06})`,
+                      transition: "transform 1s cubic-bezier(.2,.7,.2,1), opacity 1s ease, filter 1s ease",
                     }}
-                    onAnimationEnd={active && !reduced ? () => setIdx((c) => (c + 1) % destinations.length) : undefined}
-                  />
-                </span>
-                <span className={`eyebrow mt-3 block !text-[0.6rem] transition-colors ${active ? "" : "!text-ivory/45 group-hover:!text-ivory/80"}`}>0{i + 1}</span>
-                <span className={`mt-1 block font-serif text-base transition-colors sm:text-xl ${active ? "text-ivory" : "text-ivory/55 group-hover:text-ivory/90"}`}>{short[x.slug]}</span>
-              </button>
-            );
-          })}
+                  >
+                    <img src={x.image} alt={o === 0 ? `${x.name} destination` : ""} width={800} height={1000} className="h-full w-full object-cover" />
+                    <span className="absolute inset-0 bg-gradient-to-t from-navy-deep/85 via-transparent to-transparent" />
+                    <span className="absolute inset-x-0 bottom-0 p-6">
+                      <span className="eyebrow block">0{i + 1} / 0{n} · {x.region}</span>
+                      <span className="mt-2 block font-serif text-4xl text-ivory">{x.name}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Spinning seal */}
+          <div className="absolute -right-2 -top-8 z-20 h-28 w-28 sm:-right-10">
+            <svg viewBox="0 0 120 120" className="absolute inset-0 h-full w-full text-gold-soft" style={{ animation: "seal-spin 20s linear infinite" }} aria-hidden="true">
+              <defs><path id="seal-circle" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0" /></defs>
+              <text fontSize="10" fontWeight="600" fill="currentColor"><textPath href="#seal-circle" textLength="284" lengthAdjust="spacing">VISA GUIDANCE • DOCUMENTS • SUPPORT • </textPath></text>
+            </svg>
+            <span className="absolute inset-[30%] grid place-items-center rounded-full bg-gold text-navy-deep"><ArrowUpRight className="h-5 w-5" /></span>
+          </div>
+
+          {/* Sample file card: builds itself for each destination */}
+          <div key={d.slug} className="glass absolute -bottom-2 -left-3 z-20 w-60 p-5 sm:-left-16 sm:w-64">
+            <p className="eyebrow">Sample file · {short[d.slug]}</p>
+            <ul className="mt-4 space-y-2.5">
+              {items.map((t, i) => {
+                const done = i < items.length - 1;
+                return (
+                  <li key={t} className="animate-rise flex items-center gap-3 text-[0.82rem] text-ivory/90" style={{ animationDelay: `${250 + i * 300}ms` }}>
+                    <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full ${done ? "bg-gold text-navy-deep" : "border border-gold"}`} style={done ? { animation: `tick-pop .5s ${450 + i * 300}ms both` } : undefined}>
+                      {done ? <Check className="h-3 w-3" /> : <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold" />}
+                    </span>
+                    {t}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
       </div>
     </section>
