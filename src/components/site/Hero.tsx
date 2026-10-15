@@ -49,9 +49,54 @@ function HeroBackdrop() {
       }}
     >
       <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full">
-        <path d="M -60 720 C 280 660, 520 400, 900 310 S 1260 140, 1500 60" fill="none" stroke="currentColor" strokeOpacity=".4" strokeWidth="1.4" strokeLinecap="round" strokeDasharray="2 12" vectorEffect="non-scaling-stroke" style={{ animation: "dash-flow 28s linear infinite" }} />
-        <g transform="translate(1130 175) rotate(40) scale(11) translate(-12 -12)" style={{ animation: "float-y 8s ease-in-out infinite" }}>
-          <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="currentColor" fillOpacity=".14" stroke="currentColor" strokeOpacity=".7" strokeWidth="1.3" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+        <defs>
+          <linearGradient id="plane-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="currentColor" stopOpacity=".2" />
+            <stop offset="1" stopColor="currentColor" stopOpacity=".03" />
+          </linearGradient>
+          <linearGradient id="contrail" gradientUnits="userSpaceOnUse" x1="640" y1="0" x2="-560" y2="0">
+            <stop offset="0" stopColor="currentColor" stopOpacity=".6" />
+            <stop offset="1" stopColor="currentColor" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {/* Technical-drawing airliner: outer group positions it, inner group floats */}
+        <g transform="translate(360 70) rotate(-8 500 150)">
+          <g style={{ animation: "float-y 9s ease-in-out infinite" }}>
+            {/* contrails */}
+            <path d="M 650 209 L -560 209" stroke="url(#contrail)" strokeWidth="1.3" strokeDasharray="1 9" strokeLinecap="round" fill="none" vectorEffect="non-scaling-stroke" />
+            <path d="M 650 203 L -560 203" stroke="url(#contrail)" strokeWidth="1" strokeDasharray="1 14" strokeLinecap="round" fill="none" vectorEffect="non-scaling-stroke" />
+            {/* centre line */}
+            <line x1="-30" y1="150" x2="1000" y2="150" stroke="currentColor" strokeOpacity=".22" strokeWidth="1" strokeDasharray="18 5 3 5" vectorEffect="non-scaling-stroke" />
+            <g fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" vectorEffect="non-scaling-stroke">
+              {/* tail fin and stabiliser */}
+              <path d="M 270 124 L 150 28 L 106 28 L 92 116 Z" fill="url(#plane-fill)" strokeOpacity=".7" vectorEffect="non-scaling-stroke" />
+              <path d="M 108 140 L 238 172 L 204 175 L 90 146 Z" fill="url(#plane-fill)" strokeOpacity=".6" vectorEffect="non-scaling-stroke" />
+              {/* wing, pylon, engine */}
+              <path d="M 640 160 L 440 252 L 405 252 L 500 166 Z" fill="url(#plane-fill)" strokeOpacity=".7" vectorEffect="non-scaling-stroke" />
+              <path d="M 585 182 L 612 182 L 618 197 L 580 197 Z" strokeOpacity=".6" vectorEffect="non-scaling-stroke" />
+              <path d="M 566 197 L 641 197 A 8 12.5 0 0 1 641 222 L 566 222 A 8 12.5 0 0 1 566 197 Z" fill="url(#plane-fill)" strokeOpacity=".75" vectorEffect="non-scaling-stroke" />
+              <ellipse cx="641" cy="209.5" rx="4" ry="12.5" strokeOpacity=".6" vectorEffect="non-scaling-stroke" />
+              {/* fuselage */}
+              <path d="M 40 112 C 120 118 200 124 300 124 L 780 124 C 850 124 910 132 944 150 C 915 168 860 178 790 178 L 330 178 C 230 178 120 156 40 124 Z" fill="url(#plane-fill)" strokeOpacity=".8" vectorEffect="non-scaling-stroke" />
+              {/* panel lines, belly line, cheatline */}
+              {[250, 330, 420, 520, 640, 730, 820].map((x) => <line key={x} x1={x} y1="125" x2={x} y2="177" strokeOpacity=".22" vectorEffect="non-scaling-stroke" />)}
+              <path d="M 420 170 L 700 170" strokeOpacity=".3" vectorEffect="non-scaling-stroke" />
+              <path d="M 120 150 L 930 150" strokeOpacity=".35" vectorEffect="non-scaling-stroke" />
+              {/* doors and cockpit */}
+              <rect x="352" y="128" width="18" height="34" rx="8" strokeOpacity=".5" vectorEffect="non-scaling-stroke" />
+              <rect x="842" y="130" width="16" height="32" rx="7" strokeOpacity=".5" vectorEffect="non-scaling-stroke" />
+              <path d="M 888 134 L 912 134 L 930 146 L 888 146 Z" strokeOpacity=".65" vectorEffect="non-scaling-stroke" />
+              {/* cabin windows */}
+              {Array.from({ length: 28 }, (_, i) => <rect key={i} x={384 + i * 16} y="138" width="6" height="8" rx="3" strokeOpacity=".55" vectorEffect="non-scaling-stroke" />)}
+            </g>
+            {/* dimension line and annotation */}
+            <g stroke="currentColor" strokeOpacity=".35" strokeWidth="1" fill="none" vectorEffect="non-scaling-stroke">
+              <path d="M 40 292 L 944 292 M 40 282 L 40 302 M 944 282 L 944 302" vectorEffect="non-scaling-stroke" />
+              <path d="M 930 142 L 900 76 L 826 76" vectorEffect="non-scaling-stroke" />
+            </g>
+            <text x="492" y="283" textAnchor="middle" fontSize="10" letterSpacing="6" fill="currentColor" fillOpacity=".5" fontWeight="600">OVERALL LENGTH</text>
+            <text x="820" y="70" textAnchor="end" fontSize="11" letterSpacing="6" fill="currentColor" fillOpacity=".6" fontWeight="600">LHR → JFK</text>
+          </g>
         </g>
       </svg>
       <Stamp label="UNITED KINGDOM • VISA GUIDANCE • " code="UK" className="absolute right-[8%] top-[14%] w-28 rotate-[14deg] opacity-[.16] sm:w-36 lg:left-[44%] lg:right-auto lg:top-[9%] lg:-rotate-[12deg] lg:opacity-[.14]" />
@@ -109,11 +154,11 @@ export function Hero() {
       <div className="grain absolute inset-0" />
 
       {/* Giant outlined destination name */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-[4vw] select-none overflow-hidden whitespace-nowrap text-center font-serif leading-none" style={{ fontSize: "var(--name)", height: "calc(var(--name) * 0.95)" }}>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 select-none overflow-hidden whitespace-nowrap text-center font-serif leading-none" style={{ fontSize: "var(--name)", height: "calc(var(--name) * 0.64)" }}>
         <span key={d.slug} className="outline-text animate-rise inline-block opacity-70">{short[d.slug]!.toUpperCase()}</span>
       </div>
 
-      <div className="container-x relative z-10 grid items-center gap-24 pt-36 lg:grid-cols-12 lg:gap-12" style={{ paddingBottom: "calc(var(--name) * 0.85 + 4rem)" }}>
+      <div className="container-x relative z-10 grid items-center gap-24 pt-36 lg:grid-cols-12 lg:gap-12" style={{ paddingBottom: "calc(var(--name) * 0.64 + 4rem)" }}>
         {/* Copy */}
         <div className="lg:col-span-7">
           <p className="eyebrow animate-rise" style={{ animationDelay: "200ms" }}>Visa & Travel Consultancy</p>
