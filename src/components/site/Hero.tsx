@@ -19,6 +19,47 @@ const checklists: Record<string, string[]> = {
 
 const headline = ["Your", "Visa", "Journey,", "*Fast-Tracked*", "With", "Expert", "Guidance."];
 
+
+function Stamp({ label, code, className }: { label: string; code: string; className?: string }) {
+  const id = `stamp-${code}`;
+  return (
+    <svg viewBox="0 0 200 200" className={className} aria-hidden="true">
+      <defs><path id={id} d="M100,100 m-72,0 a72,72 0 1,1 144,0 a72,72 0 1,1 -144,0" /></defs>
+      <circle cx="100" cy="100" r="94" fill="none" stroke="currentColor" strokeWidth="3" />
+      <circle cx="100" cy="100" r="87" fill="none" stroke="currentColor" strokeWidth="1" />
+      <circle cx="100" cy="100" r="52" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 4" />
+      <text fontSize="14" fontWeight="700" fill="currentColor"><textPath href={`#${id}`} textLength="446" lengthAdjust="spacing">{label}</textPath></text>
+      <text x="100" y="112" textAnchor="middle" fontSize="40" fontWeight="700" fill="currentColor" style={{ fontFamily: "var(--font-serif)" }}>{code}</text>
+      <text x="100" y="134" textAnchor="middle" fontSize="11" fontWeight="700" letterSpacing="5" fill="currentColor">VISA</text>
+    </svg>
+  );
+}
+
+// Line-art plane, flight trail and visa stamps. Gold on navy at low opacity, masked at the edges so it reads as part of the theme.
+function HeroBackdrop() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 text-gold"
+      style={{
+        transform: "translate3d(calc(var(--px) * 12px), calc(var(--py) * 8px), 0)",
+        transition: "transform .5s ease-out",
+        maskImage: "radial-gradient(ellipse 85% 80% at 62% 42%, black 25%, transparent 78%)",
+        WebkitMaskImage: "radial-gradient(ellipse 85% 80% at 62% 42%, black 25%, transparent 78%)",
+      }}
+    >
+      <svg viewBox="0 0 1440 800" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full">
+        <path d="M -60 720 C 280 660, 520 400, 900 310 S 1260 140, 1500 60" fill="none" stroke="currentColor" strokeOpacity=".4" strokeWidth="1.4" strokeLinecap="round" strokeDasharray="2 12" vectorEffect="non-scaling-stroke" style={{ animation: "dash-flow 28s linear infinite" }} />
+        <g transform="translate(1130 175) rotate(40) scale(11) translate(-12 -12)" style={{ animation: "float-y 8s ease-in-out infinite" }}>
+          <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="currentColor" fillOpacity=".14" stroke="currentColor" strokeOpacity=".7" strokeWidth="1.3" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+        </g>
+      </svg>
+      <Stamp label="UNITED KINGDOM • VISA GUIDANCE • " code="UK" className="absolute right-[8%] top-[14%] w-28 rotate-[14deg] opacity-[.16] sm:w-36 lg:left-[44%] lg:right-auto lg:top-[9%] lg:-rotate-[12deg] lg:opacity-[.14]" />
+      <Stamp label="UNITED STATES • VISA GUIDANCE • " code="USA" className="absolute bottom-[26%] right-[3%] hidden w-44 rotate-[10deg] opacity-[.12] lg:block" />
+    </div>
+  );
+}
+
 export function Hero() {
   const section = useRef<HTMLElement>(null);
   const [idx, setIdx] = useState(0);
@@ -49,7 +90,7 @@ export function Hero() {
     <section
       ref={section}
       onMouseMove={onMove}
-      style={{ "--px": 0, "--py": 0 } as CSSProperties}
+      style={{ "--px": 0, "--py": 0, "--name": "clamp(4.5rem, 16vw, 18rem)" } as CSSProperties}
       className="relative flex min-h-[100svh] items-center overflow-hidden bg-navy-deep text-ivory"
     >
       {/* Atmosphere: grid, cursor glow, grain */}
@@ -62,16 +103,17 @@ export function Hero() {
           WebkitMaskImage: "radial-gradient(ellipse at 70% 45%, black 10%, transparent 72%)",
         }}
       />
+      <HeroBackdrop />
       <div className="absolute inset-0" style={{ background: "radial-gradient(760px circle at var(--mx, 72%) var(--my, 38%), color-mix(in oklab, var(--gold) 22%, transparent), transparent 62%)" }} />
       <div className="absolute inset-0" style={{ background: "radial-gradient(900px circle at 0% 100%, color-mix(in oklab, var(--navy) 90%, transparent), transparent 70%)" }} />
       <div className="grain absolute inset-0" />
 
       {/* Giant outlined destination name */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-[-2vw] select-none overflow-hidden whitespace-nowrap text-center font-serif text-[19vw] leading-none">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 select-none overflow-hidden whitespace-nowrap text-center font-serif leading-none" style={{ fontSize: "var(--name)", height: "calc(var(--name) * 0.64)" }}>
         <span key={d.slug} className="outline-text animate-rise inline-block opacity-70">{short[d.slug]!.toUpperCase()}</span>
       </div>
 
-      <div className="container-x relative z-10 grid items-center gap-20 pb-16 pt-32 lg:grid-cols-12 lg:gap-10 lg:pb-20">
+      <div className="container-x relative z-10 grid items-center gap-24 pt-36 lg:grid-cols-12 lg:gap-12" style={{ paddingBottom: "calc(var(--name) * 0.64 + 4rem)" }}>
         {/* Copy */}
         <div className="lg:col-span-7">
           <p className="eyebrow animate-rise" style={{ animationDelay: "200ms" }}>Visa & Travel Consultancy</p>
@@ -89,12 +131,12 @@ export function Hero() {
             })}
           </h1>
 
-          <p key={d.slug} className="animate-rise mt-8 min-h-[5.5rem] max-w-xl text-lg text-ivory/80 md:min-h-[4.5rem]">
+          <p key={d.slug} className="animate-rise mt-10 min-h-[5.5rem] max-w-xl text-lg text-ivory/80 md:min-h-[4.5rem]">
             <span className="mr-2 font-semibold text-gold-soft">{d.name}.</span>
             {d.blurb}
           </p>
 
-          <div className="animate-rise mt-8 flex flex-col gap-4 sm:flex-row sm:items-center" style={{ animationDelay: "900ms" }}>
+          <div className="animate-rise mt-10 flex flex-col gap-4 sm:flex-row sm:items-center" style={{ animationDelay: "900ms" }}>
             <Link to="/contact" className="btn btn-gold">Get a Free Assessment <ArrowRight className="h-4 w-4" /></Link>
             <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="btn btn-ghost-light"><WhatsAppIcon className="h-4 w-4" /> Chat on WhatsApp</a>
           </div>
@@ -103,7 +145,7 @@ export function Hero() {
           <div
             role="tablist"
             aria-label="Choose a destination"
-            className="animate-rise mt-12 grid max-w-xl grid-cols-5 gap-3 sm:gap-4"
+            className="animate-rise mt-14 grid max-w-xl grid-cols-5 gap-3 sm:gap-4"
             style={{ animationDelay: "1.1s" }}
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
@@ -133,7 +175,7 @@ export function Hero() {
         </div>
 
         {/* Card stack */}
-        <div className="animate-rise relative mx-auto pb-6 lg:col-span-5" style={{ animationDelay: "700ms" }}>
+        <div className="animate-rise relative mx-auto pb-10 lg:col-span-5" style={{ animationDelay: "700ms" }}>
           <div className="relative h-[25rem] w-[18.5rem] [--s:20px] sm:h-[32rem] sm:w-[24rem] sm:[--s:34px]" style={{ perspective: "1200px" }}>
             <div className="absolute inset-0" style={{ transformStyle: "preserve-3d", transform: "rotateY(calc(var(--px) * 7deg)) rotateX(calc(var(--py) * -5deg))", transition: "transform .4s ease-out" }}>
               {destinations.map((x, i) => {
