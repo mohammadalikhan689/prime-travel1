@@ -109,7 +109,7 @@ export function Hero() {
       <div className="grain absolute inset-0" />
 
       {/* Giant outlined destination name */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 select-none overflow-hidden whitespace-nowrap text-center font-serif leading-none" style={{ fontSize: "var(--name)", height: "calc(var(--name) * 0.64)" }}>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-[4vw] select-none overflow-hidden whitespace-nowrap text-center font-serif leading-none" style={{ fontSize: "var(--name)", height: "calc(var(--name) * 0.64)" }}>
         <span key={d.slug} className="outline-text animate-rise inline-block opacity-70">{short[d.slug]!.toUpperCase()}</span>
       </div>
 
