@@ -178,3 +178,12 @@
 @media (min-width: 768px) { .panel { flex: var(--g, 1) 1 0%; transition: flex .8s cubic-bezier(.2,.7,.2,1); } }
 .ring-arc { transition: stroke-dashoffset .9s cubic-bezier(.2,.7,.2,1); }
 @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+
+/* ---------- Hero upgrade ---------- */
+@keyframes kenburns { from { transform: scale(1.06); } to { transform: scale(1.14) translate3d(-1%, -1%, 0); } }
+@keyframes word-up { from { transform: translateY(115%); } to { transform: none; } }
+@keyframes hero-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes tick-pop { 0% { transform: scale(0); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@utility animate-kenburns { animation: kenburns 22s ease-in-out infinite alternate; }
+.hero-word { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .06em .1em 0; margin-bottom: -.1em; }
+.hero-word > span { display: inline-block; animation: word-up 1s cubic-bezier(.2,.7,.2,1) both; }
