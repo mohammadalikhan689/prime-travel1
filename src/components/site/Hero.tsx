@@ -7,6 +7,13 @@ import { WHATSAPP_URL, destinations } from "@/lib/site";
 
 const AUTOPLAY_MS = 7000;
 
+// Look of each flag in the bottom row by distance from the active one (0 = centre).
+const ROW = [
+  { x: 0, scale: 1, opacity: 0.75, sat: 1 },
+  { x: 0.9, scale: 0.6, opacity: 0.38, sat: 0.7 },
+  { x: 1.5, scale: 0.4, opacity: 0.28, sat: 0.65 },
+] as const;
+
 const short: Record<string, string> = { schengen: "Schengen", usa: "USA", canada: "Canada", turkey: "Turkey", morocco: "Morocco" };
 
 // Last item in each list shows as "in progress" (pulsing ring); the rest as done.
@@ -61,8 +68,14 @@ export function Hero() {
   const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(true); // assume reduced until checked, so no autoplay during server render
   const n = destinations.length;
+  const half = Math.floor(n / 2);
+  const prevOff = useRef<number[]>([]);
   const d = destinations[idx]!;
   const items = checklists[d.slug] ?? checklists.schengen!;
+
+  useEffect(() => {
+    prevOff.current = destinations.map((_, i) => ((i - idx + n + half) % n) - half);
+  }, [idx, n, half]);
 
   useEffect(() => {
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -85,7 +98,7 @@ export function Hero() {
     <section
       ref={section}
       onMouseMove={onMove}
-      style={{ "--px": 0, "--py": 0, "--flag-w": "clamp(18rem, 32vw, 38rem)", "--flag-vis": "calc(var(--flag-w) * 0.46)" } as CSSProperties}
+      style={{ "--px": 0, "--py": 0, "--flag-w": "clamp(18rem, 32vw, 38rem)", "--flag-vis": "calc(var(--flag-w) * 0.5)" } as CSSProperties}
       className="relative flex min-h-[100svh] items-center overflow-hidden bg-navy-deep text-ivory"
     >
       {/* Atmosphere: grid, cursor glow, grain */}
@@ -103,24 +116,39 @@ export function Hero() {
       <div className="absolute inset-0" style={{ background: "radial-gradient(900px circle at 0% 100%, color-mix(in oklab, var(--navy) 90%, transparent), transparent 70%)" }} />
       <div className="grain absolute inset-0" />
 
-      {/* Giant flag of the active destination, softly masked into the background */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 overflow-hidden" style={{ height: "var(--flag-vis)" }}>
-        <div
-          className="absolute left-1/2 top-0 aspect-[3/2] -translate-x-1/2"
-          style={{
-            width: "var(--flag-w)",
-            perspective: "900px",
-            maskImage: "radial-gradient(ellipse closest-side, black 55%, transparent 100%)",
-            WebkitMaskImage: "radial-gradient(ellipse closest-side, black 55%, transparent 100%)",
-          }}
-        >
-          <div className="absolute inset-0" style={{ transform: "rotateX(12deg) rotateY(calc(var(--px) * -7deg)) rotateZ(-2deg)", transition: "transform .5s ease-out" }}>
-            {destinations.map((x, i) => (
-              <div key={x.slug} className="absolute inset-0 transition-all duration-[1200ms] ease-out" style={{ opacity: i === idx ? 0.7 : 0, filter: "brightness(.95)", transform: i === idx ? "scale(1)" : "scale(.9)" }}>
+      {/* Flag row: all five flags, the active one centred, large and bright */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 overflow-hidden" style={{ height: "var(--flag-vis)", perspective: "1100px" }}>
+        <div className="absolute inset-0" style={{ transformStyle: "preserve-3d", transform: "rotateX(10deg) rotateY(calc(var(--px) * -5deg))", transition: "transform .5s ease-out" }}>
+          {destinations.map((x, i) => {
+            const o = ((i - idx + n + half) % n) - half;
+            const abs = Math.min(Math.abs(o), ROW.length - 1);
+            const look = ROW[abs]!;
+            const prev = prevOff.current[i];
+            const jumped = prev !== undefined && Math.abs(o - prev) > 2;
+            return (
+              <button
+                key={x.slug}
+                type="button"
+                tabIndex={-1}
+                aria-label={`Show ${x.name}`}
+                onClick={() => setIdx(i)}
+                className="pointer-events-auto absolute left-1/2 top-0 aspect-[3/2]"
+                style={{
+                  width: "var(--flag-w)",
+                  marginLeft: "calc(var(--flag-w) / -2)",
+                  opacity: look.opacity,
+                  filter: `saturate(${look.sat}) brightness(.95)`,
+                  zIndex: 10 - abs,
+                  transform: `translate3d(calc(var(--flag-w) * ${(Math.sign(o) * look.x).toFixed(2)}), 0, ${-abs * 90}px) scale(${look.scale})`,
+                  transition: jumped ? "opacity 1s ease" : "transform 1.1s cubic-bezier(.2,.7,.2,1), opacity 1s ease, filter 1s ease",
+                  maskImage: "radial-gradient(ellipse closest-side, black 55%, transparent 100%)",
+                  WebkitMaskImage: "radial-gradient(ellipse closest-side, black 55%, transparent 100%)",
+                }}
+              >
                 <Flag slug={x.slug} className="h-full w-full" />
-              </div>
-            ))}
-          </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
