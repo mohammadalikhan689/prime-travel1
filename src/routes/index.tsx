@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import hero from "@/assets/hero.webp";
 import documents from "@/assets/documents.webp";
 import { FinalCTA, Reveal, SectionHead } from "@/components/site/Layout";
 import { Hero } from "@/components/site/Hero";
@@ -15,7 +14,6 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Prime Travel LTD — Visa Guidance, Fast-Tracked" },
       { property: "og:description", content: "Expert visa guidance and travel arrangements from an independent consultancy." },
     ],
-    links: [{ rel: "preload", as: "image", href: hero, type: "image/webp" }],
   }),
   component: Home,
 });
