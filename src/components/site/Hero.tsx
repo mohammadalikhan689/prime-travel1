@@ -5,7 +5,7 @@ import { WhatsAppIcon } from "@/components/site/Layout";
 import { Flag } from "@/components/site/Flags";
 import { WHATSAPP_URL, destinations } from "@/lib/site";
 
-const AUTOPLAY_MS = 7000;
+const AUTOPLAY_MS = 4000;
 
 // Look of each flag in the bottom row by distance from the active one (0 = centre).
 const ROW = [
