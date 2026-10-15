@@ -1,12 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
-import { ArrowRight } from "lucide-react";
 import hero from "@/assets/hero.webp";
 import documents from "@/assets/documents.webp";
-import { FinalCTA, Reveal, SectionHead, WhatsAppIcon } from "@/components/site/Layout";
+import { FinalCTA, Reveal, SectionHead } from "@/components/site/Layout";
+import { Hero } from "@/components/site/Hero";
 import { FaqList } from "@/components/site/Faqs";
-import { DestinationMarquee, DestinationPanels, FileReadiness, HeroFileCard, ScrollTimeline, ServiceBento, StatsStrip } from "@/components/site/Showcase";
-import { WHATSAPP_URL, pillars } from "@/lib/site";
+import { DestinationMarquee, DestinationPanels, FileReadiness, ScrollTimeline, ServiceBento, StatsStrip } from "@/components/site/Showcase";
+import { pillars } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,44 +19,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Home,
 });
-
-function Hero() {
-  const img = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let raf = 0;
-    const on = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        if (img.current) img.current.style.transform = `translate3d(0, ${window.scrollY * 0.25}px, 0)`;
-      });
-    };
-    window.addEventListener("scroll", on, { passive: true });
-    return () => { window.removeEventListener("scroll", on); cancelAnimationFrame(raf); };
-  }, []);
-  return (
-    <section className="relative flex min-h-[100svh] items-end overflow-hidden bg-navy text-ivory">
-      <div ref={img} className="absolute inset-0 will-change-transform">
-        <img src={hero} alt="Paris rooftops at dusk with the Eiffel Tower" width={1920} height={1088} fetchPriority="high" className="animate-hero-zoom h-full w-full object-cover" />
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-navy-deep via-navy/60 to-navy/30" />
-      <div className="container-x relative pb-20 pt-40 md:pb-28">
-        <p className="eyebrow animate-rise" style={{ animationDelay: "300ms" }}>Visa & Travel Consultancy</p>
-        <h1 className="animate-rise mt-6 max-w-5xl text-5xl leading-[1.02] sm:text-6xl md:text-8xl" style={{ animationDelay: "450ms" }}>
-          Your Visa Journey, <em className="text-gold-soft">Fast-Tracked</em> With Expert Guidance.
-        </h1>
-        <p className="animate-rise mt-8 max-w-xl text-lg text-ivory/80" style={{ animationDelay: "650ms" }}>
-          Professional visa guidance, organised documentation, and dedicated support to help you move forward with confidence.
-        </p>
-        <div className="animate-rise mt-10 flex flex-col gap-4 sm:flex-row" style={{ animationDelay: "850ms" }}>
-          <Link to="/contact" className="btn btn-gold">Get a Free Assessment <ArrowRight className="h-4 w-4" /></Link>
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="btn btn-ghost-light"><WhatsAppIcon className="h-4 w-4" /> Chat on WhatsApp</a>
-        </div>
-      </div>
-      <HeroFileCard />
-    </section>
-  );
-}
 
 function Home() {
   return (
