@@ -3,7 +3,7 @@ import documents from "@/assets/documents.webp";
 import { FinalCTA, Reveal, SectionHead } from "@/components/site/Layout";
 import { Hero } from "@/components/site/Hero";
 import { FaqList } from "@/components/site/Faqs";
-import { DestinationMarquee, DestinationPanels, FileReadiness, ScrollTimeline, ServiceBento, StatsStrip } from "@/components/site/Showcase";
+import { DestinationMarquee, DestinationPanels, FileReadiness, ScrollTimeline, ServiceBento } from "@/components/site/Showcase";
 import { pillars } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
@@ -23,7 +23,6 @@ function Home() {
     <>
       <Hero />
 
-      <StatsStrip />
       <DestinationMarquee />
 
       <section className="py-28 md:py-36">
