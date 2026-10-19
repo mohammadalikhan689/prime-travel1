@@ -5,7 +5,7 @@ import { WhatsAppIcon } from "@/components/site/Layout";
 import { Flag } from "@/components/site/Flags";
 import { WHATSAPP_URL, destinations } from "@/lib/site";
 
-const AUTOPLAY_MS = 1500;
+const AUTOPLAY_MS = 7000;
 
 // Look of each flag in the bottom row by distance from the active one (0 = centre).
 const ROW = [
@@ -66,7 +66,7 @@ export function Hero() {
   const section = useRef<HTMLElement>(null);
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [reduced, setReduced] = useState(true); // assume reduced until checked, so no autoplay during server render
+  const [reduced, setReduced] = useState(false); // start running immediately; switched off after mount if the user prefers reduced motion
   const n = destinations.length;
   const half = Math.floor(n / 2);
   const prevOff = useRef<number[]>([]);
@@ -99,7 +99,7 @@ export function Hero() {
       ref={section}
       onMouseMove={onMove}
       style={{ "--px": 0, "--py": 0, "--flag-w": "clamp(18rem, 32vw, 38rem)", "--flag-vis": "calc(var(--flag-w) * 0.5)" } as CSSProperties}
-      className="relative flex min-h-[100svh] items-center overflow-hidden bg-navy-deep text-ivory"
+      className="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-navy-deep text-ivory"
     >
       {/* Atmosphere: grid, cursor glow, grain */}
       <div
@@ -155,7 +155,7 @@ export function Hero() {
       <div className="container-x relative z-10 grid items-center gap-24 pt-36 lg:grid-cols-12 lg:gap-12" style={{ paddingBottom: "calc(var(--flag-vis) + 3.5rem)" }}>
         {/* Copy */}
         <div className="lg:col-span-7">
-          <p className="eyebrow animate-rise" style={{ animationDelay: "200ms" }}>Visa & Travel Consultancy</p>
+          <p className="eyebrow animate-rise" style={{ animationDelay: "0ms" }}>Visa & Travel Consultancy</p>
           <h1 className="mt-6 text-5xl leading-[1.02] sm:text-6xl xl:text-7xl">
             {headline.map((w, i) => {
               const em = w.startsWith("*");
@@ -163,7 +163,7 @@ export function Hero() {
               return (
                 <span key={w}>
                   <span className="hero-word">
-                    <span style={{ animationDelay: `${350 + i * 90}ms` }}>{em ? <em className="text-gold-soft">{text}</em> : text}</span>
+                    <span style={{ animationDelay: `${80 + i * 60}ms` }}>{em ? <em className="text-gold-soft">{text}</em> : text}</span>
                   </span>{" "}
                 </span>
               );
@@ -175,7 +175,7 @@ export function Hero() {
             {d.blurb}
           </p>
 
-          <div className="animate-rise mt-10 flex flex-col gap-4 sm:flex-row sm:items-center" style={{ animationDelay: "900ms" }}>
+          <div className="animate-rise mt-10 flex flex-col gap-4 sm:flex-row sm:items-center" style={{ animationDelay: "450ms" }}>
             <Link to="/contact" className="btn btn-gold">Get a Free Assessment <ArrowRight className="h-4 w-4" /></Link>
             <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="btn btn-ghost-light"><WhatsAppIcon className="h-4 w-4" /> Chat on WhatsApp</a>
           </div>
@@ -185,7 +185,7 @@ export function Hero() {
             role="tablist"
             aria-label="Choose a destination"
             className="animate-rise mt-14 grid max-w-xl grid-cols-5 gap-3 sm:gap-4"
-            style={{ animationDelay: "600ms" }}
+            style={{ animationDelay: "350ms" }}
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
             onFocus={() => setPaused(true)}
@@ -216,7 +216,7 @@ export function Hero() {
         </div>
 
         {/* Card stack */}
-        <div className="animate-rise relative mx-auto pb-10 lg:col-span-5" style={{ animationDelay: "150ms" }}>
+        <div className="animate-rise relative mx-auto pb-10 lg:col-span-5" style={{ animationDelay: "100ms" }}>
           <div className="relative h-[25rem] w-[18.5rem] [--s:20px] sm:h-[32rem] sm:w-[24rem] sm:[--s:34px]" style={{ perspective: "1200px" }}>
             <div className="absolute inset-0" style={{ transformStyle: "preserve-3d", transform: "rotateY(calc(var(--px) * 7deg)) rotateX(calc(var(--py) * -5deg))", transition: "transform .4s ease-out" }}>
               {destinations.map((x, i) => {
@@ -267,8 +267,8 @@ export function Hero() {
               {items.map((t, i) => {
                 const done = i < items.length - 1;
                 return (
-                  <li key={t} className="animate-rise flex items-center gap-3 text-[0.82rem] text-ivory/90" style={{ animationDelay: `${250 + i * 300}ms` }}>
-                    <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full ${done ? "bg-gold text-navy-deep" : "border border-gold"}`} style={done ? { animation: `tick-pop .5s ${450 + i * 300}ms both` } : undefined}>
+                  <li key={t} className="animate-rise flex items-center gap-3 text-[0.82rem] text-ivory/90" style={{ animationDelay: `${150 + i * 220}ms` }}>
+                    <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full ${done ? "bg-gold text-navy-deep" : "border border-gold"}`} style={done ? { animation: `tick-pop .5s ${350 + i * 220}ms both` } : undefined}>
                       {done ? <Check className="h-3 w-3" /> : <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold" />}
                     </span>
                     {t}
