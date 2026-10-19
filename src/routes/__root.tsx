@@ -94,10 +94,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     scripts: [
       {
         id: "retell-widget",
-        src: "https://dashboard.retellai.com/retell-widget.js",
+        src: "https://dashboard.retellai.com/retell-widget-v2.js",
         type: "module",
-        "data-public-key": import.meta.env.VITE_RETELL_PUBLIC_KEY ?? "public_key_05f9faf3519087f7ccd11",
+        // Voice-only: with just a voice agent set, the widget opens straight into the voice call screen.
+        "data-voice-public-key": import.meta.env.VITE_RETELL_PUBLIC_KEY ?? "public_key_05f9faf3519087f7ccd11",
         "data-voice-agent-id": import.meta.env.VITE_RETELL_AGENT_ID ?? "agent_4df585ff82844fb7772dcbbb92",
+        "data-title": "Prime Travel Voice Assistant",
+        "data-bot-name": "Prime",
+        "data-theme-color": "#0a1424",
+        "data-component-color": "#b9955b",
+        "data-popup-message": "Hi! Ask me about your visa plans.",
       },
     ],
   }),
