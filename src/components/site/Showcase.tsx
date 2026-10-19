@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { ArrowUpRight, Check } from "lucide-react";
 import { Reveal } from "@/components/site/Layout";
 import { ServiceArt } from "@/components/site/ServiceArt";
@@ -77,17 +77,44 @@ export function DestinationMarquee() {
 /* 2 — Bento grid with cursor spotlight */
 const spans = ["md:col-span-3", "md:col-span-3", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-3", "md:col-span-3"];
 
-export function ServiceBento() {
-  const move = (e: MouseEvent<HTMLElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
-    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+// One service card: staggered 3D entrance when scrolled into view, cursor tilt, spotlight and spinning gold border.
+function BentoCard({ i, className, children }: { i: number; className: string; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setSeen(true); io.disconnect(); } }, { threshold: 0.15 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  const move = (e: MouseEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    el.style.setProperty("--mx", `${x}px`);
+    el.style.setProperty("--my", `${y}px`);
+    el.style.setProperty("--ry", `${(x / r.width - 0.5) * 8}deg`);
+    el.style.setProperty("--rx", `${(y / r.height - 0.5) * -8}deg`);
   };
+  const leave = (e: MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.setProperty("--rx", "0deg");
+    e.currentTarget.style.setProperty("--ry", "0deg");
+  };
+  return (
+    <div ref={ref} data-in={seen} className={`bento-card ${className}`} style={{ "--d": `${(i % 3) * 110}ms` } as CSSProperties} onMouseMove={move} onMouseLeave={leave}>
+      <div className="bento-tilt h-full">{children}</div>
+    </div>
+  );
+}
+
+export function ServiceBento() {
   return (
     <div className="mt-16 grid gap-4 md:grid-cols-6">
       {services.map((s, i) => (
-        <Reveal key={s.slug} delay={(i % 3) * 80} className={spans[i]}>
-          <Link to="/services/$slug" params={{ slug: s.slug }} onMouseMove={move}
+        <BentoCard key={s.slug} i={i} className={spans[i]!}>
+          <Link to="/services/$slug" params={{ slug: s.slug }}
             className="spot group flex h-full flex-col overflow-hidden border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-gold hover:shadow-[0_30px_60px_-30px_color-mix(in_oklab,var(--navy)_45%,transparent)]">
             <div className="relative">
               <ServiceArt slug={s.slug} className="h-44" />
@@ -102,10 +129,10 @@ export function ServiceBento() {
                   <li key={x} className="border border-gold/40 px-2.5 py-1 text-[0.68rem] text-navy/80">{x}</li>
                 ))}
               </ul>
-              <span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-xs font-semibold uppercase tracking-[0.18em] text-gold">Learn more <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" /></span>
+              <span className="learn mt-auto inline-flex items-center gap-1.5 self-start pt-5 text-xs font-semibold uppercase tracking-[0.18em] text-gold">Learn more <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" /></span>
             </div>
           </Link>
-        </Reveal>
+        </BentoCard>
       ))}
     </div>
   );

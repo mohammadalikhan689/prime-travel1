@@ -77,7 +77,7 @@ const art: Record<string, ReactNode> = {
 
 export function ServiceArt({ slug, className = "" }: { slug: string; className?: string }) {
   return (
-    <div className={`relative overflow-hidden bg-gradient-to-br from-navy to-navy-deep ${className}`}>
+    <div className={`art-draw relative overflow-hidden bg-gradient-to-br from-navy to-navy-deep ${className}`}>
       <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(var(--ivory) .6px, transparent .7px)", backgroundSize: "18px 18px", maskImage: "radial-gradient(circle at 50% 50%, black, transparent 75%)" }} />
       <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gold/25 blur-3xl transition-opacity duration-700 group-hover:opacity-100" />
       <svg viewBox="0 0 240 140" fill="none" stroke="var(--gold-soft)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"
