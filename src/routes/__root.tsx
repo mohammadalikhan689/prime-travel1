@@ -91,21 +91,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@400;500;600&display=swap" },
     ],
-    scripts: [
-      {
-        id: "retell-widget",
-        src: "https://dashboard.retellai.com/retell-widget-v2.js",
-        type: "module",
-        // Voice-only: with just a voice agent set, the widget opens straight into the voice call screen.
-        "data-voice-public-key": import.meta.env.VITE_RETELL_PUBLIC_KEY ?? "public_key_05f9faf3519087f7ccd11",
-        "data-voice-agent-id": import.meta.env.VITE_RETELL_AGENT_ID ?? "agent_4df585ff82844fb7772dcbbb92",
-        "data-title": "Prime Travel Voice Assistant",
-        "data-bot-name": "Prime",
-        "data-theme-color": "#0a1424",
-        "data-component-color": "#b9955b",
-        "data-popup-message": "Hi! Ask me about your visa plans.",
-      },
-    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -118,6 +103,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script id="retell-widget" src="https://dashboard.retellai.com/retell-widget-v2.js" type="module" {...RETELL_ATTRS} />
       </head>
       <body>
         {children}
@@ -126,6 +112,18 @@ function RootShell({ children }: { children: ReactNode }) {
     </html>
   );
 }
+
+// Retell voice widget settings. The script tag itself is written directly into <head> in RootShell below,
+// because the widget looks up its own <script id="retell-widget"> tag and it must stay in the page.
+const RETELL_ATTRS: Record<string, string> = {
+  "data-voice-public-key": import.meta.env.VITE_RETELL_PUBLIC_KEY ?? "public_key_05f9faf3519087f7ccd11",
+  "data-voice-agent-id": import.meta.env.VITE_RETELL_AGENT_ID ?? "agent_4df585ff82844fb7772dcbbb92",
+  "data-title": "Prime Travel Voice Assistant",
+  "data-bot-name": "Prime",
+  "data-theme-color": "#0a1424",
+  "data-component-color": "#b9955b",
+  "data-popup-message": "Hi! Ask me about your visa plans.",
+};
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
