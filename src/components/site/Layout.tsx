@@ -131,7 +131,7 @@ export function Footer() {
 export function WhatsAppFab() {
   return (
     <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp"
-      className="fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-whatsapp text-ivory shadow-lg transition-transform hover:scale-105">
+      className="fixed bottom-5 left-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-whatsapp text-ivory shadow-lg transition-transform hover:scale-105">
       <WhatsAppIcon className="h-7 w-7" />
     </a>
   );
