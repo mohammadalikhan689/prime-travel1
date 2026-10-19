@@ -91,6 +91,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@400;500;600&display=swap" },
     ],
+    scripts: [
+      {
+        id: "retell-widget",
+        src: "https://dashboard.retellai.com/retell-widget.js",
+        type: "module",
+        "data-public-key": import.meta.env.VITE_RETELL_PUBLIC_KEY ?? "public_key_05f9faf3519087f7ccd11",
+        "data-voice-agent-id": import.meta.env.VITE_RETELL_AGENT_ID ?? "agent_4df585ff82844fb7772dcbbb92",
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
