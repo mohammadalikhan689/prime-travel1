@@ -185,18 +185,38 @@ export function ScrollTimeline() {
     window.addEventListener("scroll", on, { passive: true });
     return () => { window.removeEventListener("scroll", on); cancelAnimationFrame(raf); };
   }, []);
+  const doneCount = steps.filter((_, i) => p > (i + 0.35) / steps.length).length;
+  const active = doneCount - 1; // the step currently being reached
   return (
-    <ol ref={ref} className="relative mt-4 space-y-16 pl-14 md:pl-20">
+    <ol ref={ref} className="relative mt-4 space-y-20 pl-14 md:pl-20">
       <span className="absolute bottom-0 left-[1.15rem] top-0 w-px bg-border md:left-[1.65rem]" />
-      <span className="absolute left-[1.15rem] top-0 w-px bg-gold md:left-[1.65rem]" style={{ height: `${p * 100}%` }} />
+      <span className="absolute left-[1.15rem] top-0 w-px bg-gold shadow-[0_0_14px_var(--gold)] md:left-[1.65rem]" style={{ height: `${p * 100}%` }} />
+      {/* glowing marker that travels down the line with your scroll */}
+      <span aria-hidden="true" className="absolute left-[1.15rem] z-10 md:left-[1.65rem]" style={{ top: `${p * 100}%`, opacity: p > 0.01 && p < 0.995 ? 1 : 0, transition: "opacity .4s" }}>
+        <span className="absolute -left-[7px] -top-[7px] h-3.5 w-3.5 rounded-full bg-gold shadow-[0_0_18px_4px_var(--gold)]" />
+        <span className="absolute -left-[7px] -top-[7px] h-3.5 w-3.5 animate-ping rounded-full bg-gold/60" />
+      </span>
       {steps.map((s, i) => {
-        const done = p > (i + 0.35) / steps.length;
+        const done = i < doneCount;
+        const on = i === active;
         return (
-          <li key={s.title} className="relative">
-            <span className={`absolute -left-14 top-0 grid h-10 w-10 place-items-center rounded-full border font-serif text-lg transition-all duration-500 md:-left-20 md:h-14 md:w-14 md:text-2xl ${done ? "scale-105 border-gold bg-gold text-navy-deep" : "border-border bg-background text-muted-foreground"}`}
-              style={done ? { animation: "pulse-ring 1.6s ease-out 1" } : undefined}>{done ? <Check className="h-5 w-5" /> : i + 1}</span>
-            <h3 className={`text-3xl transition-opacity duration-500 md:text-4xl ${done ? "opacity-100" : "opacity-40"}`}>{s.title}</h3>
-            <p className={`mt-2 max-w-md text-muted-foreground transition-opacity duration-500 ${done ? "opacity-100" : "opacity-40"}`}>{s.text}</p>
+          <li key={s.title} className="relative isolate">
+            {/* highlight panel + ghost numeral for the current step */}
+            <span aria-hidden="true" className={`absolute -inset-x-6 -inset-y-6 -z-10 border border-gold/25 bg-gradient-to-r from-gold/10 via-gold/[.04] to-transparent transition-all duration-700 ease-out ${on ? "scale-100 opacity-100" : "scale-95 opacity-0"}`} />
+            <span aria-hidden="true" className="pointer-events-none absolute -top-8 right-0 -z-10 select-none font-serif text-[8rem] leading-none text-transparent transition-all duration-1000 ease-out md:text-[10rem]"
+              style={{ WebkitTextStroke: "1px color-mix(in oklab, var(--gold) 38%, transparent)", opacity: on ? 1 : done ? 0.35 : 0.12, transform: on ? "translateX(0)" : "translateX(28px)" }}>
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span className={`absolute -left-14 top-0 grid h-10 w-10 place-items-center rounded-full border font-serif text-lg transition-all duration-500 md:-left-20 md:h-14 md:w-14 md:text-2xl ${done ? "scale-105 border-gold bg-gold text-navy" : "border-border bg-background text-muted-foreground"}`}
+              style={done ? { animation: "pulse-ring 1.6s ease-out 1" } : undefined}>
+              {/* ring that draws itself around the number */}
+              <svg viewBox="0 0 56 56" aria-hidden="true" className="absolute -inset-px h-[calc(100%+2px)] w-[calc(100%+2px)] -rotate-90">
+                <circle cx="28" cy="28" r="26.5" fill="none" stroke="var(--gold)" strokeWidth="2" pathLength="1" strokeDasharray="1" strokeDashoffset={done ? 0 : 1} style={{ transition: "stroke-dashoffset 1.1s cubic-bezier(.3,.6,.2,1)" }} />
+              </svg>
+              {done ? <Check className="relative h-5 w-5" style={{ animation: "tick-pop .55s .3s both" }} /> : <span className="relative">{i + 1}</span>}
+            </span>
+            <h3 className={`wipe inline-block text-3xl md:text-4xl ${done ? "on" : ""}`}>{s.title}</h3>
+            <p className="mt-2 max-w-md text-muted-foreground transition-all duration-700 ease-out" style={{ opacity: done ? 1 : 0.35, transform: done ? "none" : "translateY(10px)", transitionDelay: done ? ".25s" : "0s" }}>{s.text}</p>
           </li>
         );
       })}
