@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
-import { ArrowUpRight, Check } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { Reveal } from "@/components/site/Layout";
 import { ServiceArt } from "@/components/site/ServiceArt";
 import { ServiceIcon } from "@/components/site/ServiceIcon";
@@ -238,35 +238,107 @@ const docs = [
 
 export function FileReadiness() {
   const [on, setOn] = useState<Set<number>>(new Set());
-  const pct = on.size / docs.length;
-  const C = 2 * Math.PI * 88;
-  const toggle = (i: number) => setOn((s) => { const n = new Set(s); if (n.has(i)) n.delete(i); else n.add(i); return n; });
+  const [seen, setSeen] = useState(false);
+  const [shown, setShown] = useState(0);
+  const root = useRef<HTMLDivElement>(null);
+  const shownRef = useRef(0);
+  const n = docs.length;
+  const pct = on.size / n;
+  const full = on.size === n;
+  const seg = 100 / n - 2; // arc length (pathLength = 100) with a small gap
+  const toggle = (i: number) => setOn((s) => { const x = new Set(s); if (x.has(i)) x.delete(i); else x.add(i); return x; });
+  const spot = (e: MouseEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
   const msg = pct === 0 ? "Tick what you already have." : pct < 0.5 ? "A start — we'll map the gaps." : pct < 1 ? "Well on your way." : "A complete-looking file. Let's review it together.";
+
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setSeen(true); io.disconnect(); } }, { threshold: 0.2 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // count the percentage up/down smoothly
+  useEffect(() => {
+    const from = shownRef.current;
+    const to = Math.round(pct * 100);
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const k = Math.min(1, (now - t0) / 700);
+      const v = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+      shownRef.current = v;
+      setShown(v);
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [pct]);
+
   return (
-    <div className="mt-16 grid items-center gap-12 lg:grid-cols-12">
+    <div ref={root} className="mt-16 grid items-center gap-12 lg:grid-cols-12">
       <div className="lg:col-span-5">
         <div className="relative mx-auto grid aspect-square max-w-sm place-items-center">
-          <svg viewBox="0 0 200 200" className="absolute inset-0 -rotate-90" aria-hidden="true">
-            <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" strokeOpacity=".12" strokeWidth="2" />
-            <circle cx="100" cy="100" r="88" fill="none" stroke="var(--gold)" strokeWidth="3" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={C * (1 - pct)} className="ring-arc" />
-          </svg>
-          <div className="text-center" aria-live="polite">
-            <p className="font-serif text-7xl text-gold-soft">{Math.round(pct * 100)}<span className="text-3xl">%</span></p>
-            <p className="eyebrow mt-2 !text-ivory">File readiness</p>
-            <p className="mx-auto mt-3 max-w-[12rem] text-xs text-ivory/60">{msg}</p>
+          {/* segmented ring: one arc per document, lights up as you tick */}
+          <div className="absolute inset-0" style={{ opacity: seen ? 1 : 0, transform: seen ? "none" : "scale(.82) rotate(-50deg)", transition: "opacity 1s ease, transform 1.4s cubic-bezier(.2,.7,.2,1)" }}>
+            <svg viewBox="0 0 200 200" className="h-full w-full -rotate-90" aria-hidden="true">
+              <g style={{ transformOrigin: "100px 100px", animation: `orbit ${full ? 7 : 26}s linear infinite` }}>
+                <circle cx="100" cy="100" r="96" fill="none" stroke="var(--ivory)" strokeOpacity=".16" strokeWidth="1" strokeDasharray="1.5 5" />
+                <circle cx="100" cy="4" r="2.6" fill="var(--gold)" style={{ filter: "drop-shadow(0 0 4px var(--gold))" }} />
+              </g>
+              {docs.map((_, i) => (
+                <g key={i} transform={`rotate(${(i * 360) / n + 1} 100 100)`}>
+                  <circle cx="100" cy="100" r="86" fill="none" stroke="var(--ivory)" strokeOpacity=".14" strokeWidth="4.5" pathLength="100" strokeDasharray={`${seg} ${100 - seg}`} />
+                  <circle cx="100" cy="100" r="86" fill="none" stroke="var(--gold)" strokeWidth="4.5" pathLength="100"
+                    strokeDasharray={on.has(i) ? `${seg} ${100 - seg}` : `0 100`}
+                    style={{ transition: "stroke-dasharray .8s cubic-bezier(.3,.6,.2,1)", filter: on.has(i) ? "drop-shadow(0 0 5px var(--gold))" : "none" }} />
+                </g>
+              ))}
+            </svg>
           </div>
+          {full && Array.from({ length: 16 }, (_, i) => (
+            <span key={i} aria-hidden="true" className="spark" style={{ "--a": `${i * 22.5}deg`, "--dist": `${135 + (i % 3) * 20}px` } as CSSProperties} />
+          ))}
+          <div className="relative text-center" aria-live="polite">
+            <p className={`font-serif text-7xl text-gold-soft transition-transform duration-500 ${full ? "scale-110" : ""}`}>{shown}<span className="text-3xl">%</span></p>
+            <p className="eyebrow mt-2 !text-ivory">File readiness</p>
+            <p key={msg} className="animate-rise mx-auto mt-3 max-w-[12rem] text-xs text-ivory/60">{msg}</p>
+            <p className="mt-2 text-[0.7rem] uppercase tracking-[0.2em] text-gold-soft/80">{on.size} of {n} ready</p>
+          </div>
+        </div>
+        <div className="mt-8 flex min-h-[3rem] items-center justify-center gap-5">
+          {on.size > 0 && (
+            <>
+              <Link key={full ? "f" : "p"} to="/contact" className="btn btn-gold animate-rise">{full ? "Get my file reviewed" : "Get my personalised checklist"} <ArrowRight className="h-4 w-4" /></Link>
+              <button type="button" onClick={() => setOn(new Set())} className="text-xs uppercase tracking-[0.18em] text-ivory/50 transition-colors hover:text-ivory">Reset</button>
+            </>
+          )}
         </div>
       </div>
       <ul className="grid gap-2 sm:grid-cols-2 lg:col-span-7">
-        {docs.map(([t, n], i) => (
-          <li key={t}>
-            <button type="button" aria-pressed={on.has(i)} onClick={() => toggle(i)}
-              className={`flex w-full items-start gap-4 border p-4 text-left transition-all duration-300 ${on.has(i) ? "border-gold bg-gold/10" : "border-ivory/15 hover:border-ivory/40"}`}>
-              <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center border transition-colors ${on.has(i) ? "border-gold bg-gold text-navy-deep" : "border-ivory/40"}`}>{on.has(i) && <Check className="h-3.5 w-3.5" />}</span>
-              <span><span className="block text-sm font-semibold">{t}</span><span className="block text-xs text-ivory/55">{n}</span></span>
-            </button>
-          </li>
-        ))}
+        {docs.map(([t, d], i) => {
+          const c = on.has(i);
+          return (
+            <li key={t} data-in={seen} className="doc-item" style={{ "--d": `${i * 70}ms` } as CSSProperties}>
+              <button type="button" aria-pressed={c} onClick={() => toggle(i)} onMouseMove={spot}
+                className={`doc-card spot flex w-full items-start gap-4 border p-4 text-left transition-all duration-300 hover:-translate-y-0.5 ${c ? "is-on border-gold" : "border-ivory/15 hover:border-ivory/40"}`}>
+                <span className={`relative mt-0.5 grid h-5 w-5 shrink-0 place-items-center border transition-all duration-300 ${c ? "scale-110 border-gold bg-gold" : "border-ivory/40"}`}>
+                  <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-navy-deep" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4 12.5l5 5L20 6.5" pathLength="1" strokeDasharray="1" strokeDashoffset={c ? 0 : 1} style={{ transition: "stroke-dashoffset .45s ease .1s" }} />
+                  </svg>
+                </span>
+                <span>
+                  <span className={`block text-sm font-semibold transition-colors duration-300 ${c ? "text-gold-soft" : ""}`}>{t}</span>
+                  <span className="block text-xs text-ivory/55">{d}</span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
         <li className="sm:col-span-2"><p className="pt-2 text-xs text-ivory/45">Illustrative only. Requirements differ by destination and purpose; we provide a personalised checklist.</p></li>
       </ul>
     </div>
