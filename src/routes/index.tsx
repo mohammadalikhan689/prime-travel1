@@ -2,9 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import documents from "@/assets/documents.webp";
 import { FinalCTA, Reveal, SectionHead } from "@/components/site/Layout";
 import { Hero } from "@/components/site/Hero";
+import { WhySection } from "@/components/site/WhyParts";
 import { FaqList } from "@/components/site/Faqs";
 import { DestinationMarquee, DestinationPanels, FileReadiness, ScrollTimeline, ServiceBento } from "@/components/site/Showcase";
-import { destinations, pillars } from "@/lib/site";
+import { destinations } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -69,24 +70,7 @@ function Home() {
 
       {/* Why */}
       <section className="bg-card py-28 md:py-36">
-        <div className="container-x grid items-center gap-16 lg:grid-cols-2">
-          <Reveal>
-            <img src={documents} alt="Passport and neatly organised travel documents" loading="lazy" width={1280} height={1024} className="aspect-[5/4] w-full object-cover" />
-          </Reveal>
-          <div>
-            <SectionHead eyebrow="Why Prime Travel LTD" title="Guidance that feels personal." />
-            <ul className="mt-12">
-              {pillars.map((p, i) => (
-                <Reveal key={p.title} delay={i * 60}>
-                  <li className="grid grid-cols-[3rem_minmax(0,1fr)] border-t border-border py-5">
-                    <span className="hairline mt-3" />
-                    <div><h3 className="text-xl">{p.title}</h3><p className="mt-1 text-sm text-muted-foreground">{p.text}</p></div>
-                  </li>
-                </Reveal>
-              ))}
-            </ul>
-          </div>
-        </div>
+        <WhySection image={documents} />
       </section>
 
       {/* FAQ */}
