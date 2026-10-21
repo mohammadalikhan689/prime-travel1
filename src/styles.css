@@ -247,3 +247,42 @@
   background: linear-gradient(90deg, color-mix(in oklab, var(--gold) 22%, transparent), color-mix(in oklab, var(--gold) 4%, transparent)); }
 .doc-card.is-on::after { transform: scaleX(1); }
 @media (prefers-reduced-motion: reduce) { .doc-item { opacity: 1 !important; transform: none !important; } }
+
+/* ---------- FAQ animations ---------- */
+@keyframes faq-in { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } to { opacity: 1; transform: translateX(14px); filter: none; } }
+@keyframes faq-float { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-16px) rotate(4deg); } }
+
+.faq-glyph { position: absolute; right: -0.5rem; top: -3rem; z-index: -1; pointer-events: none; user-select: none; font-family: var(--font-serif, "Cormorant Garamond", serif);
+  font-size: 15rem; line-height: 1; color: transparent; -webkit-text-stroke: 1px color-mix(in oklab, var(--gold) 45%, transparent); animation: faq-float 9s ease-in-out infinite; }
+
+/* lines draw across, rows rise in one after another */
+.faq-top, .faq-line { position: absolute; left: 0; right: 0; height: 1px; background: var(--border); transform: scaleX(0); transform-origin: left; transition: transform 1.2s cubic-bezier(.2,.7,.2,1) var(--d, 0ms); }
+.faq-top { top: 0; }
+.faq-line { bottom: 0; }
+.faq-item { opacity: 0; transform: translateY(28px); transition: opacity .8s ease var(--d), transform .9s cubic-bezier(.2,.7,.2,1) var(--d); }
+[data-in="true"] .faq-item { opacity: 1; transform: none; }
+[data-in="true"] .faq-top, [data-in="true"] .faq-line { transform: scaleX(1); }
+
+/* open row: gold bar grows down, soft wash, question and number nudge right */
+.faq-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--gold); transform: scaleY(0); transform-origin: top; transition: transform .6s cubic-bezier(.2,.7,.2,1); }
+.faq-item[data-state="open"] { background: linear-gradient(90deg, color-mix(in oklab, var(--gold) 10%, transparent), transparent 75%); }
+.faq-item[data-state="open"] .faq-bar { transform: scaleY(1); }
+.faq-num, .faq-q { transition: transform .5s cubic-bezier(.2,.7,.2,1), color .3s; }
+.faq-item:hover .faq-q { transform: translateX(8px); }
+.faq-item:hover .faq-num { transform: translateX(4px); }
+.faq-item[data-state="open"] .faq-q, .faq-item[data-state="open"] .faq-num { transform: translateX(14px); }
+.faq-item[data-state="open"] .faq-ans { animation: faq-in .8s cubic-bezier(.2,.7,.2,1) .12s both; }
+
+/* plus turns into minus inside a circle that fills gold */
+.faq-icon { position: relative; width: 2.25rem; height: 2.25rem; flex-shrink: 0; border: 1px solid var(--border); border-radius: 9999px; transition: background .5s, border-color .4s, transform .6s cubic-bezier(.2,.7,.2,1); }
+.faq-icon::before, .faq-icon::after { content: ""; position: absolute; left: 50%; top: 50%; width: .8rem; height: 1.5px; background: var(--navy); transform: translate(-50%, -50%); transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+.faq-icon::after { transform: translate(-50%, -50%) rotate(90deg); }
+.faq-item:hover .faq-icon { border-color: var(--gold); }
+.faq-item[data-state="open"] .faq-icon { background: var(--gold); border-color: var(--gold); transform: rotate(180deg); }
+.faq-item[data-state="open"] .faq-icon::after { transform: translate(-50%, -50%) rotate(0deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-item { opacity: 1 !important; transform: none !important; }
+  .faq-top, .faq-line { transform: scaleX(1) !important; }
+  .faq-glyph { animation: none; }
+}
