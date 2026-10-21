@@ -78,7 +78,7 @@ export function DestinationMarquee() {
 const spans = ["md:col-span-3", "md:col-span-3", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-3", "md:col-span-3"];
 
 // One service card: staggered 3D entrance when scrolled into view, cursor tilt, spotlight and spinning gold border.
-function BentoCard({ i, className, children }: { i: number; className: string; children: ReactNode }) {
+export function BentoCard({ i, className, children }: { i: number; className: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [seen, setSeen] = useState(false);
   useEffect(() => {
