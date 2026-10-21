@@ -323,3 +323,16 @@
   .eb-line { transform: scaleX(1) !important; }
   .cta-orb, .cta-star, .cta-shimmer, .cta-pulse, .cta-shine { animation: none !important; }
 }
+
+/* ---------- "Why" section: moving spotlight + active row ---------- */
+@property --hx { syntax: "<percentage>"; inherits: false; initial-value: 50%; }
+@property --hy { syntax: "<percentage>"; inherits: false; initial-value: 50%; }
+.why-spot { pointer-events: none; transition: --hx 1s cubic-bezier(.2,.7,.2,1), --hy 1s cubic-bezier(.2,.7,.2,1);
+  background: radial-gradient(circle 190px at var(--hx) var(--hy), transparent 0%, color-mix(in oklab, var(--navy-deep, #050e1c) 55%, transparent) 100%); }
+.why-row { transition: background .6s; }
+.why-row[data-on="true"] { background: linear-gradient(90deg, color-mix(in oklab, var(--gold) 12%, transparent), transparent 80%); }
+.why-prog { position: absolute; left: 0; top: -1px; height: 1px; width: 100%; background: var(--gold); transform: scaleX(0); transform-origin: left; }
+.why-hair { transform-origin: left; transition: transform .6s cubic-bezier(.2,.7,.2,1); }
+.why-row[data-on="true"] .why-hair { transform: scaleX(1.6); }
+.why-text { transition: transform .6s cubic-bezier(.2,.7,.2,1); }
+.why-row[data-on="true"] .why-text { transform: translateX(14px); }
