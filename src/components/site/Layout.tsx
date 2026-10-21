@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 import { BRAND, DISCLAIMER, WHATSAPP_DISPLAY, WHATSAPP_URL, nav, services } from "@/lib/site";
 
@@ -151,18 +151,95 @@ export function PageHero({ eyebrow, title, text, image }: { eyebrow: string; tit
   );
 }
 
+const ctaWords = ["Let's", "Plan", "Your", "Next", "Step."];
+// Destination nodes for the animated route map: position in a 1440x600 box and the curve's control point.
+const ctaRoutes = [
+  { name: "Canada", x: 180, y: 170, c: [440, 70] },
+  { name: "USA", x: 300, y: 450, c: [420, 510] },
+  { name: "Schengen", x: 1150, y: 150, c: [960, 60] },
+  { name: "Turkey", x: 1270, y: 400, c: [1090, 490] },
+  { name: "Morocco", x: 1020, y: 530, c: [880, 480] },
+] as const;
+
+const magnet = (e: MouseEvent<HTMLElement>) => {
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  el.style.transform = `translate(${(e.clientX - (r.left + r.width / 2)) * 0.25}px, ${(e.clientY - (r.top + r.height / 2)) * 0.35}px)`;
+};
+const unmagnet = (e: MouseEvent<HTMLElement>) => { e.currentTarget.style.transform = ""; };
+
 export function FinalCTA() {
+  const ref = useRef<HTMLElement>(null);
+  const svg = useRef<SVGSVGElement>(null);
+  const [seen, setSeen] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) svg.current?.pauseAnimations();
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { if (e?.isIntersecting) { setSeen(true); io.disconnect(); } }, { threshold: 0.25 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const move = (e: MouseEvent<HTMLElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+
   return (
-    <section className="bg-navy py-28 text-ivory md:py-36">
-      <Reveal className="container-x text-center">
-        <p className="eyebrow">Begin</p>
-        <h2 className="mx-auto mt-5 max-w-3xl text-5xl md:text-7xl">Let's Plan Your Next Step.</h2>
-        <p className="mx-auto mt-6 max-w-xl text-ivory/70">Tell us about your travel plans and let our team guide you through the process.</p>
-        <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-          <Link to="/contact" className="btn btn-gold">Contact Our Team <ArrowUpRight className="h-4 w-4" /></Link>
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="btn btn-ghost-light"><WhatsAppIcon className="h-4 w-4" /> Chat on WhatsApp</a>
+    <section ref={ref} data-in={seen} onMouseMove={move} className="cta-section relative isolate overflow-hidden bg-navy py-28 text-ivory md:py-40">
+      {/* drifting gold and blue glows */}
+      <div aria-hidden="true" className="cta-orb cta-orb-a" />
+      <div aria-hidden="true" className="cta-orb cta-orb-b" />
+      {/* twinkling stars */}
+      <div aria-hidden="true" className="absolute inset-0">
+        {Array.from({ length: 36 }, (_, i) => (
+          <span key={i} className="cta-star" style={{ left: `${(i * 37 + 11) % 100}%`, top: `${(i * 53 + 7) % 100}%`, animationDelay: `${(i % 9) * 0.6}s`, animationDuration: `${3 + (i % 5)}s`, width: i % 4 === 0 ? 3 : 2, height: i % 4 === 0 ? 3 : 2 }} />
+        ))}
+      </div>
+      {/* routes radiating to the five destinations, with travelling dots */}
+      <div aria-hidden="true" className="absolute inset-0" style={{ maskImage: "radial-gradient(ellipse 44% 52% at 50% 50%, transparent 0%, transparent 55%, black 100%)", WebkitMaskImage: "radial-gradient(ellipse 44% 52% at 50% 50%, transparent 0%, transparent 55%, black 100%)" }}>
+        <svg ref={svg} viewBox="0 0 1440 600" preserveAspectRatio="xMidYMid slice" className="h-full w-full text-gold">
+          {ctaRoutes.map((r, i) => {
+            const d = `M 720 300 Q ${r.c[0]} ${r.c[1]} ${r.x} ${r.y}`;
+            return (
+              <g key={r.name}>
+                <path d={d} fill="none" stroke="currentColor" strokeOpacity=".3" strokeWidth="1.2" strokeDasharray="2 8" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                <circle r="9" fill="currentColor" fillOpacity=".2"><animateMotion dur={`${6 + i * 1.3}s`} begin={`${i * 1.1}s`} repeatCount="indefinite" path={d} /></circle>
+                <circle r="3.2" fill="currentColor"><animateMotion dur={`${6 + i * 1.3}s`} begin={`${i * 1.1}s`} repeatCount="indefinite" path={d} /></circle>
+                <circle cx={r.x} cy={r.y} r="4" fill="currentColor" />
+                <circle cx={r.x} cy={r.y} r="4" fill="none" stroke="currentColor" strokeWidth="1.2">
+                  <animate attributeName="r" values="4;22" dur="3.2s" begin={`${i * 0.6}s`} repeatCount="indefinite" />
+                  <animate attributeName="opacity" values=".7;0" dur="3.2s" begin={`${i * 0.6}s`} repeatCount="indefinite" />
+                </circle>
+                <text x={r.x} y={r.y - 16} textAnchor="middle" fontSize="11" letterSpacing="4" fill="currentColor" fillOpacity=".55" fontWeight="600">{r.name.toUpperCase()}</text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+      {/* light that follows the cursor */}
+      <div aria-hidden="true" className="absolute inset-0" style={{ background: "radial-gradient(520px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklab, var(--gold) 16%, transparent), transparent 65%)" }} />
+      <div className="grain absolute inset-0" />
+
+      <div className="container-x relative text-center">
+        <p className="eyebrow inline-flex items-center gap-4"><span className="eb-line origin-right" />Begin<span className="eb-line origin-left" /></p>
+        <h2 className="mx-auto mt-6 max-w-3xl text-5xl md:text-7xl" style={{ perspective: "800px" }}>
+          {ctaWords.map((w, i) => (
+            <span key={w}><span className={`cta-word ${i >= 3 ? "cta-shimmer" : ""}`} style={{ "--i": i } as CSSProperties}>{w}</span>{" "}</span>
+          ))}
+        </h2>
+        <p className="cta-rise mx-auto mt-6 max-w-xl text-ivory/70" style={{ "--r": "900ms" } as CSSProperties}>Tell us about your travel plans and let our team guide you through the process.</p>
+        <div className="cta-rise mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row" style={{ "--r": "1100ms" } as CSSProperties}>
+          <Link to="/contact" onMouseMove={magnet} onMouseLeave={unmagnet} className="btn btn-gold cta-mag cta-pulse group relative overflow-hidden">
+            Contact Our Team <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-1" />
+            <span className="cta-shine" aria-hidden="true" />
+          </Link>
+          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" onMouseMove={magnet} onMouseLeave={unmagnet} className="btn btn-ghost-light cta-mag"><WhatsAppIcon className="h-4 w-4" /> Chat on WhatsApp</a>
         </div>
-      </Reveal>
+      </div>
     </section>
   );
 }
