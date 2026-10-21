@@ -157,7 +157,7 @@ export function DestinationPanels() {
               <p className="eyebrow">{d.region}</p>
               <h3 className="mt-2 text-3xl md:text-5xl">{d.name}</h3>
               <p className="mt-3 max-w-md text-sm text-ivory/80">{d.blurb}</p>
-              <Link to="/contact" className="mt-5 inline-flex items-center gap-2 border-b border-gold pb-1 text-xs font-semibold uppercase tracking-[0.18em] text-gold-soft">Enquire <ArrowUpRight className="h-4 w-4" /></Link>
+              <Link to="/contact" search={{ destination: d.slug }} className="mt-5 inline-flex items-center gap-2 border-b border-gold pb-1 text-xs font-semibold uppercase tracking-[0.18em] text-gold-soft">Enquire <ArrowUpRight className="h-4 w-4" /></Link>
             </div>
           </div>
         );

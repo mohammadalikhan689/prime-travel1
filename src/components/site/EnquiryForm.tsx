@@ -16,7 +16,7 @@ type Errors = Partial<Record<keyof z.infer<typeof schema>, string>>;
 
 const field = "w-full border-0 border-b border-input bg-transparent px-0 py-3 text-navy placeholder:text-muted-foreground/60 focus:border-gold focus:outline-none focus:ring-0";
 
-export function EnquiryForm() {
+export function EnquiryForm({ defaultDestination = "" }: { defaultDestination?: string }) {
   const [errors, setErrors] = useState<Errors>({});
   const [opened, setOpened] = useState(false);
 
@@ -56,7 +56,7 @@ export function EnquiryForm() {
       <label className="block sm:col-span-2"><span className="eyebrow !text-muted-foreground">Email (optional)</span>
         <input name="email" type="email" autoComplete="email" className={field} aria-invalid={!!errors.email} /><Err k="email" /></label>
       <label className="block"><span className="eyebrow !text-muted-foreground">Destination *</span>
-        <select name="destination" defaultValue="" className={field} aria-invalid={!!errors.destination}>
+        <select name="destination" defaultValue={defaultDestination} className={field} aria-invalid={!!errors.destination}>
           <option value="" disabled>Select…</option>
           {destinations.map((d) => <option key={d.slug}>{d.name}</option>)}
           <option>Not sure yet</option>
