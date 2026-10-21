@@ -25,7 +25,7 @@ export function ServiceRows() {
   return (
     <div ref={ref} data-in={seen} className="container-x grid gap-x-12 md:grid-cols-2">
       {services.map((s, i) => (
-        <div key={s.slug} className="doc-item" style={{ "--d": `${(i % 2) * 120 + Math.floor(i / 2) * 90}ms` } as CSSProperties}>
+        <div key={s.slug} data-in={seen} className="doc-item" style={{ "--d": `${(i % 2) * 120 + Math.floor(i / 2) * 90}ms` } as CSSProperties}>
           <Link to="/services/$slug" params={{ slug: s.slug }} onMouseMove={spot} className="svc-row spot group relative flex gap-6 px-3 py-10">
             <span className="svc-line" aria-hidden="true" />
             <span className="svc-line-gold" aria-hidden="true" />
