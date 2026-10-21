@@ -138,15 +138,66 @@ export function WhatsAppFab() {
 }
 
 export function PageHero({ eyebrow, title, text, image }: { eyebrow: string; title: string; text?: string; image?: string }) {
+  const section = useRef<HTMLElement>(null);
+  const layer = useRef<HTMLDivElement>(null);
+  const words = title.split(" ");
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const on = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        if (layer.current) layer.current.style.transform = `translate3d(0, ${Math.min(window.scrollY, 900) * 0.3}px, 0)`;
+      });
+    };
+    window.addEventListener("scroll", on, { passive: true });
+    return () => { window.removeEventListener("scroll", on); cancelAnimationFrame(raf); };
+  }, []);
+
+  const move = (e: MouseEvent<HTMLElement>) => {
+    const el = section.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+
   return (
-    <section className="relative overflow-hidden bg-navy pb-20 pt-40 text-ivory md:pb-28 md:pt-48">
-      {image && <img src={image} alt="" className="animate-hero-zoom absolute inset-0 h-full w-full object-cover opacity-35" />}
+    <section ref={section} onMouseMove={move} className="relative isolate overflow-hidden bg-navy pb-20 pt-40 text-ivory md:pb-28 md:pt-48">
+      {image && (
+        <div ref={layer} className="absolute inset-x-0 -inset-y-24 will-change-transform">
+          <img src={image} alt="" className="animate-hero-zoom h-full w-full object-cover opacity-35" />
+        </div>
+      )}
       <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/40" />
-      <div className="container-x relative">
-        <p className="eyebrow animate-rise">{eyebrow}</p>
-        <h1 className="animate-rise mt-5 max-w-4xl text-5xl leading-[1.05] md:text-7xl" style={{ animationDelay: "120ms" }}>{title}</h1>
-        {text && <p className="animate-rise mt-6 max-w-2xl text-lg text-ivory/75" style={{ animationDelay: "240ms" }}>{text}</p>}
+      {/* faint grid, cursor glow, rising gold dust, grain */}
+      <div aria-hidden="true" className="absolute inset-0" style={{
+        backgroundImage: "linear-gradient(color-mix(in oklab, var(--ivory) 6%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--ivory) 6%, transparent) 1px, transparent 1px)",
+        backgroundSize: "84px 84px",
+        maskImage: "radial-gradient(ellipse at 30% 60%, black 5%, transparent 70%)",
+        WebkitMaskImage: "radial-gradient(ellipse at 30% 60%, black 5%, transparent 70%)",
+      }} />
+      <div aria-hidden="true" className="absolute inset-0" style={{ background: "radial-gradient(520px circle at var(--mx, 25%) var(--my, 60%), color-mix(in oklab, var(--gold) 20%, transparent), transparent 65%)" }} />
+      <div aria-hidden="true" className="absolute inset-0">
+        {Array.from({ length: 22 }, (_, i) => (
+          <span key={i} className="pg-dot" style={{ left: `${(i * 41 + 9) % 100}%`, bottom: `${(i * 17) % 45}%`, animationDuration: `${9 + (i % 6) * 2}s`, animationDelay: `-${(i * 1.7) % 14}s`, width: i % 3 === 0 ? 3 : 2, height: i % 3 === 0 ? 3 : 2 }} />
+        ))}
       </div>
+      <div className="grain absolute inset-0" />
+
+      <div className="container-x relative">
+        <p className="eyebrow animate-rise inline-flex items-center gap-4"><span className="pg-bar" />{eyebrow}</p>
+        <h1 className="mt-5 max-w-4xl text-5xl leading-[1.05] md:text-7xl">
+          {words.map((w, i) => (
+            <span key={i}>
+              <span className="hero-word"><span style={{ animationDelay: `${120 + i * 70}ms` }}>{i === words.length - 1 ? <span className="cta-shimmer">{w}</span> : w}</span></span>{" "}
+            </span>
+          ))}
+        </h1>
+        {text && <p className="animate-rise mt-6 max-w-2xl text-lg text-ivory/75" style={{ animationDelay: `${300 + words.length * 70}ms` }}>{text}</p>}
+      </div>
+      <span aria-hidden="true" className="pg-sweep" />
     </section>
   );
 }
