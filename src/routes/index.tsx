@@ -93,8 +93,11 @@ function Home() {
       <section className="py-28 md:py-36">
         <div className="container-x grid gap-16 lg:grid-cols-12">
           <div className="lg:col-span-4">
-            <SectionHead eyebrow="FAQs" title="Questions, answered." text="Visa decisions and processing times are always set by the relevant authorities." />
-            <Reveal><Link to="/faqs" className="link-underline mt-8 inline-block pb-1 text-sm font-semibold">See all FAQs</Link></Reveal>
+            <div className="relative isolate lg:sticky lg:top-32">
+              <span aria-hidden="true" className="faq-glyph">?</span>
+              <SectionHead eyebrow="FAQs" title="Questions, answered." text="Visa decisions and processing times are always set by the relevant authorities." />
+              <Reveal><Link to="/faqs" className="link-underline mt-8 inline-block pb-1 text-sm font-semibold">See all FAQs</Link></Reveal>
+            </div>
           </div>
           <div className="lg:col-span-8"><FaqList limit={6} /></div>
         </div>
