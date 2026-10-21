@@ -31,7 +31,7 @@ function Destinations() {
                   <p className="eyebrow">{String(i + 1).padStart(2, "0")} — {d.region}</p>
                   <h2 className="mt-4 text-5xl md:text-6xl">{d.name}</h2>
                   <p className="mt-6 max-w-md text-lg text-muted-foreground">{d.blurb}</p>
-                  <Link to="/contact" className="btn btn-ghost-dark mt-10">Enquire about {d.name}</Link>
+                  <Link to="/contact" search={{ destination: d.slug }} className="btn btn-ghost-dark mt-10">Enquire about {d.name}</Link>
                 </div>
               </article>
             </Reveal>
